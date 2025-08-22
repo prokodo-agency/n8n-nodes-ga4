@@ -1,0 +1,49 @@
+{
+  "name": "@prokodo/n8n-nodes-ga4",
+  "version": "0.1.0",
+  "description": "Google Analytics 4 via Service Account for n8n (runReport, realtime, metadata, timing helpers)",
+  "author": "prokodo <info@prokodo.com>",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "files": ["dist", "README.md", "LICENSE"],
+  "keywords": [
+    "n8n",
+    "n8n-nodes",
+    "n8n-community-node",
+    "n8n-community-node-package",
+    "ga4",
+    "google analytics",
+    "service account",
+    "prokodo"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prokodo-agency/n8n-nodes-ga4.git"
+  },
+  "homepage": "https://www.prokodo.com",
+  "bugs": {
+    "url": "https://github.com/prokodo-agency/n8n-nodes-ga4/issues"
+  },
+  "n8n": {
+    "credentials": ["dist/credentials/GoogleServiceAccount.credentials.js"],
+    "nodes": ["dist/nodes/Ga4Tools/Ga4Tools.node.js"]
+  },
+  "dependencies": {
+    "google-auth-library": "^9.0.0",
+    "node-fetch": "^3.3.2"
+  },
+  "peerDependencies": {
+    "n8n-core": ">=1.88.0 <2",
+    "n8n-workflow": ">=1.88.0 <2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "tsc && mkdir -p dist/nodes/Ga4Tools && cp -f src/nodes/Ga4Tools/*.{svg,png} dist/nodes/Ga4Tools/ 2>/dev/null || true && cp -f src/credentials/*.{svg,png} dist/credentials/ 2>/dev/null || true",
+    "prepublishOnly": "npm run build"
+  },
+  "publishConfig": { "access": "public" }
+}
