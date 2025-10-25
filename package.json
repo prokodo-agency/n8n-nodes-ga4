@@ -1,6 +1,6 @@
 {
   "name": "@prokodo/n8n-nodes-ga4",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Google Analytics 4 via Service Account for n8n (runReport, realtime, metadata, timing helpers)",
   "author": "prokodo <info@prokodo.com>",
   "license": "MIT",
