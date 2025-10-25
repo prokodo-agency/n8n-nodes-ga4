@@ -5,7 +5,6 @@ import type {
   IDataObject,
 } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
-import fetch from 'node-fetch';
 import { getAccessToken } from '../../utils/ga4Auth';
 import { nextIsoWithinHorizon, label } from '../../utils/time';
 import { NODE_DESCRIPTION } from './Ga4Tools.const';
@@ -17,6 +16,21 @@ type GA4Response = {
   [key: string]: any;
 };
 
+/**
+ * Fetch helper: nutzt globales fetch; fällt auf node-fetch zurück,
+ * wenn fetch in sehr alten Node-18-Builds fehlt.
+ */
+async function httpFetch(input: RequestInfo | URL, init?: RequestInit) {
+  const f: typeof fetch | undefined = (globalThis as any).fetch;
+  if (f) return f(input as any, init as any);
+  // Fallback nur, wenn optionalDependency vorhanden ist
+  const nf = (await import('node-fetch')).default as unknown as typeof fetch;
+  return nf(input as any, init as any);
+}
+
+// Kleines Hilfs-Wrapper für JSON-POSTs
+const postJson = (url: string, body: unknown, token: string) =>
+  httpFetch(url, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 function readJsonParamOrThrow(
   ctx: IExecuteFunctions,
   name: string,
@@ -90,11 +104,7 @@ export class Ga4Tools implements INodeType {
           );
 					if (this.getNodeParameter('returnQuota', i) as boolean) body.returnPropertyQuota = true;
 
-					const resp = await fetch(`${base}:runReport`, {
-						method: 'POST',
-						headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-						body: JSON.stringify(body),
-					});
+					const resp = await postJson(`${base}:runReport`, body, token);
 					if (!resp.ok) {
 						const text = await resp.text();
 						if (resp.status === 403) {
@@ -117,11 +127,7 @@ export class Ga4Tools implements INodeType {
             i,
             { metrics: [{ name: 'activeUsers' }] } as IDataObject,
           );
-					const resp = await fetch(`${base}:runRealtimeReport`, {
-						method: 'POST',
-						headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-						body: JSON.stringify(body),
-					});
+					const resp = await postJson(`${base}:runRealtimeReport`, body, token);
 					if (!resp.ok) {
 						const text = await resp.text();
 						if (resp.status === 403) {
@@ -138,7 +144,7 @@ export class Ga4Tools implements INodeType {
 				}
 
 				if (operation === 'getMetadata') {
-					const resp = await fetch(`${base}/metadata`, {
+					const resp = await httpFetch(`${base}/metadata`, {
 						method: 'GET',
 						headers: { Authorization: `Bearer ${token}` },
 					});
@@ -191,11 +197,7 @@ export class Ga4Tools implements INodeType {
               returnPropertyQuota: includeQuota,
             };
           
-            const resp = await fetch(`${base}:runReport`, {
-              method: 'POST',
-              headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify(reportBody),
-            });
+            const resp = await postJson(`${base}:runReport`, reportBody, token);
             if (!resp.ok) {
               const text = await resp.text();
               throw new NodeOperationError(this.getNode(), `${resp.status} ${text}`, { itemIndex: i });
@@ -319,11 +321,7 @@ export class Ga4Tools implements INodeType {
 					};
 					if (dimensionFilter) reportBody.dimensionFilter = dimensionFilter;
 
-					const resp = await fetch(`${base}:runReport`, {
-						method: 'POST',
-						headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-						body: JSON.stringify(reportBody),
-					});
+					const resp = await postJson(`${base}:runReport`, reportBody, token);
 					if (!resp.ok) {
 						const text = await resp.text();
 						if (resp.status === 403) {
@@ -464,11 +462,7 @@ export class Ga4Tools implements INodeType {
 					};
 					if (filter) body.dimensionFilter = filter;
 
-					const resp = await fetch(`${base}:runReport`, {
-						method: 'POST',
-						headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-						body: JSON.stringify(body),
-					});
+					const resp = await postJson(`${base}:runReport`, body, token);
 					if (!resp.ok) {
 						const text = await resp.text();
 						if (resp.status === 403) {
@@ -506,11 +500,7 @@ export class Ga4Tools implements INodeType {
 						returnPropertyQuota: includeQuota,
 					};
 
-					const resp = await fetch(`${base}:runReport`, {
-						method: 'POST',
-						headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-						body: JSON.stringify(body),
-					});
+					const resp = await postJson(`${base}:runReport`, body, token);
 					if (!resp.ok) {
 						const text = await resp.text();
 						if (resp.status === 403) {

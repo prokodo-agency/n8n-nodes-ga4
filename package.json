@@ -6,6 +6,9 @@
   "license": "MIT",
   "type": "commonjs",
   "main": "dist/index.js",
+  "engines": {
+    "node": ">=18"
+  },
   "files": ["dist", "README.md", "LICENSE"],
   "keywords": [
     "n8n",
@@ -30,7 +33,9 @@
     "nodes": ["dist/nodes/Ga4Tools/Ga4Tools.node.js"]
   },
   "dependencies": {
-    "google-auth-library": "^9.0.0",
+    "google-auth-library": "^9.0.0"
+  },
+  "optionalDependencies": {
     "node-fetch": "^3.3.2"
   },
   "peerDependencies": {
